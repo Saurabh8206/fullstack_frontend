@@ -1,9 +1,10 @@
 import axios from "axios";
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
-export default function AddUser() {
+export default function EditUsers() {
   let navigate = useNavigate();
+  const { id } = useParams();
   const [user, setUser] = useState({
     name: "",
     userName: "",
@@ -16,6 +17,10 @@ export default function AddUser() {
   const onInputChange = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
   };
+
+  useEffect(() => {
+    loadUser();
+  }, []);
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -30,7 +35,7 @@ export default function AddUser() {
     }
 
     try {
-      await axios.post("http://localhost:8080/api/user/create", user, {
+      await axios.put(`http://localhost:8080/api/users/update/${id}`, user, {
         headers: {
           sessionId: "c073875c-0ad2-11ee-bc31-c85b76f75c0e",
         },
@@ -46,6 +51,20 @@ export default function AddUser() {
       }
     }
   };
+
+  const loadUser = async () => {
+    const result = await axios.get(
+      `http://localhost:8080/api/users/fetchById/${id}`,
+      {
+        headers: {
+          sessionId: "c073875c-0ad2-11ee-bc31-c85b76f75c0e",
+        },
+      }
+    );
+
+    setUser(result.data);
+  };
+
   return (
     <div className="container">
       <div className="row">
