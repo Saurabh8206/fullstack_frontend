@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Link, useParams } from "react-router-dom";
 
 export default function Home() {
   const [users, setUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
-
+  const { id } = useParams();
   useEffect(() => {
     loadUsers();
-  }, [currentPage, pageSize]);
+  }, []);
 
   const loadUsers = async () => {
     try {
@@ -31,6 +32,25 @@ export default function Home() {
     }
   };
 
+  const deleteUser = async (id) => {
+    try {
+      await axios.delete(`http://localhost:8080/api/users/delete/${id}`, {
+        headers: {
+          sessionId: "c073875c-0ad2-11ee-bc31-c85b76f75c0e",
+        },
+      });
+      loadUsers();
+    } catch (error) {
+      if (error.request) {
+        // Handle network errors
+        console.error("Network Error:", error.message);
+        alert(
+          "There was a problem with the network connection. Please try again later."
+        );
+      }
+    }
+  };
+
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
@@ -42,7 +62,6 @@ export default function Home() {
           <thead>
             <tr>
               <th scope="col">Sr No.</th>
-              <th scope="col">UserId</th>
               <th scope="col">Name</th>
               <th scope="col">User Name</th>
               <th scope="col">Email</th>
@@ -54,20 +73,19 @@ export default function Home() {
             {users.map((user, index) => (
               <tr key={user.id}>
                 <th scope="row">{(currentPage - 1) * pageSize + index + 1}</th>
-                <td>{user.id}</td>
                 <td>{user.name}</td>
                 <td>{user.userName}</td>
                 <td>{user.email}</td>
                 <td>{user.contactNo}</td>
                 <td>
-                  <button className="btn me-1">
-                    <i className="bi bi-pencil"></i>
-                  </button>
-                  <button className="btn">
-                    <i className="bi bi-trash"></i>
-                  </button>
-                  <button className="btn">
+                  <Link className="btn" to={`/viewUser/${user.id}`}>
                     <i className="bi bi-eye"></i>
+                  </Link>
+                  <Link className="btn me-1" to={`/editUser/${user.id}`}>
+                    <i className="bi bi-pencil"></i>
+                  </Link>
+                  <button className="btn" onClick={() => deleteUser(user.id)}>
+                    <i className="bi bi-trash"></i>
                   </button>
                 </td>
                 <td></td>
